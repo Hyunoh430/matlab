@@ -1,50 +1,52 @@
-% BPSK Simulation with Theoretical BER Comparison
-
+% Corrected BPSK Simulation with Linear Eb/N0
 % Parameters
-bitnum = 1000000; % Number of bits to simulate
+bitnum = 1000000; % Increase number of bits for better accuracy
 Eb = 1; % Energy per bit
-EbNo_dB = 0:0.5:10; % Eb/No range in dB
 
-% Preallocate arrays
-ber_sim = zeros(size(EbNo_dB));
-ber_theory = zeros(size(EbNo_dB));
+% Generate Eb/N0 values (linear scale from 10^-3 to 10^1)
+EbN0_linear = logspace(-3, 1, 20); % 20 points from 10^-3 to 10^1
+
+% Preallocate array for BER
+ber_sim = zeros(size(EbN0_linear));
 
 % Generate random bits
 bits = randi([0 1], 1, bitnum);
 
 % BPSK modulation
-s = 2*bits - 1;
+s = sqrt(Eb) * (2*bits - 1);
 
 % Simulation loop
-for i = 1:length(EbNo_dB)
+for i = 1:length(EbN0_linear)
     % Calculate noise variance
-    No = Eb / (10^(EbNo_dB(i)/10));
-    n0 = No/2;
+    n0 = Eb / EbN0_linear(i);
     
     % Generate noise
-    n = sqrt(n0) * randn(size(s));
+    noise = sqrt(n0/2) * randn(size(s));
     
     % Received signal
-    r = s + n;
+    R = s + noise;
     
     % Decision
-    bits_received = (r > 0);
+    bits_received = (R > 0);
     
     % Calculate BER
     ber_sim(i) = sum(bits ~= bits_received) / bitnum;
-    
-    % Theoretical BER
-    ber_theory(i) = 0.5 * erfc(sqrt(10^(EbNo_dB(i)/10)));
 end
+
+% Theoretical BER
+ber_theory = 0.5 * erfc(sqrt(EbN0_linear));
 
 % Plotting
 figure;
-semilogy(EbNo_dB, ber_sim,  'DisplayName', 'Simulation');
+loglog(EbN0_linear, ber_sim, 'MarkerSize', 10, 'DisplayName', 'Simulation');
 hold on;
-semilogy(EbNo_dB, ber_theory, 'DisplayName', 'Theory');
+loglog(EbN0_linear, ber_theory,  'LineWidth', 1, 'DisplayName', 'Theory');
 grid on;
-xlabel('Eb/No (dB)');
+xlabel('Eb/N0 (linear)');
 ylabel('Bit Error Rate');
 title('BPSK BER Performance');
 legend('Location', 'southwest');
-ylim([1e-5 1]);
+xlim([1e-3, 1e1]);
+ylim([1e-5, 1]);
+xticks(10.^(-3:1:1));
+yticks(10.^(-5:1:0));
