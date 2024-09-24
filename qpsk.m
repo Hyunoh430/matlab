@@ -1,46 +1,53 @@
-% QPSK Simulation using erfc for theoretical BER
+% QPSK Simulation with Linear Eb/N0
 % Parameters
-symbolnum = 1000000; % Number of symbols
-Es = 1; % Energy per symbol (Es = 2Eb for QPSK)
+bitnum = 1000000; % Number of bits (should be even for QPSK)
+Es = 1; % Energy per symbol (2 bits per symbol in QPSK)
+Eb = Es/2; % Energy per bit
 
 % Generate Eb/N0 values (linear scale from 10^-3 to 10^1)
-EbN0_linear = logspace(-3, 1, 20); % 20 points from 10^-3 to 10^1
+EbN0_linear = logspace(-3, 1, 20);
 
 % Preallocate array for BER
 ber_sim = zeros(size(EbN0_linear));
 
-% Generate random bits and map to QPSK symbols
-bits = randi([0 1], 1, 2*symbolnum);
-symbols = (1-2*bits(1:2:end)) + 1j*(1-2*bits(2:2:end));
-symbols = symbols * sqrt(Es/2); % Normalize symbol energy
+% Generate random bits
+bits = randi([0 1], 1, bitnum);
+
+% QPSK modulation
+% Reshape bits into 2-bit symbols
+I = 2*bits(1:2:end) - 1;
+Q = 2*bits(2:2:end) - 1;
+s = (I + 1i*Q) / sqrt(2);
 
 % Simulation loop
 for i = 1:length(EbN0_linear)
-    % Calculate noise variance (N0 = Es/(2*EbN0) for QPSK)
-    N0 = Es / (2 * EbN0_linear(i));
+    % Calculate noise variance
+    n0 = Eb / EbN0_linear(i);
     
     % Generate complex noise
-    noise = sqrt(N0/2) * (randn(size(symbols)) + 1j*randn(size(symbols)));
+    noise = sqrt(n0/2) * (randn(size(s)) + 1i*randn(size(s)));
     
     % Received signal
-    R = symbols + noise;
+    R = s + noise;
     
     % Decision
-    bits_received = [real(R) < 0; imag(R) < 0];
+    I_received = real(R) > 0;
+    Q_received = imag(R) > 0;
+    bits_received = [I_received; Q_received];
     bits_received = bits_received(:)';
     
     % Calculate BER
-    ber_sim(i) = sum(bits ~= bits_received) / (2*symbolnum);
+    ber_sim(i) = sum(bits ~= bits_received) / bitnum;
 end
 
-% Theoretical BER for QPSK using erfc
+% Theoretical BER for QPSK (same as BPSK for same Eb/N0)
 ber_theory = 0.5 * erfc(sqrt(EbN0_linear));
 
 % Plotting
 figure;
-loglog(EbN0_linear, ber_sim, 'b.', 'MarkerSize', 10, 'DisplayName', 'Simulation');
+loglog(EbN0_linear, ber_sim, 'o-', 'MarkerSize', 6, 'LineWidth', 1.5, 'DisplayName', 'Simulation');
 hold on;
-loglog(EbN0_linear, ber_theory, 'r-', 'LineWidth', 2, 'DisplayName', 'Theory');
+loglog(EbN0_linear, ber_theory, 'r-', 'LineWidth', 1.5, 'DisplayName', 'Theory');
 grid on;
 xlabel('Eb/N0 (linear)');
 ylabel('Bit Error Rate');
