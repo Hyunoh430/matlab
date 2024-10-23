@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<instructions>
+  <downloadInstruction>
+      <downloadUrl>https://ssd.mathworks.com/supportfiles/downloads/SupportPackageThirdParty/R2024a/libiio/maca64/libiio-0.25.ga015afe-macOS-13-arm64.tar.gz</downloadUrl>
+    <archive>libiio-0.25.ga015afe-macOS-13-arm64.tar.gz</archive>
+  </downloadInstruction>
+  <installInstructions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="ExtractInstruction">
+    <archiveType>GZIPPED_TAR_ARCHIVE</archiveType>
+    <archiveName>$IS_DOWNLOADED_FILE</archiveName>
+    <destinationFolderName>maca64</destinationFolderName>
+  </installInstructions>
+  <displayName>Library for interfacing with IIO devices</displayName>
+  <licenseUrl>https://raw.githubusercontent.com/analogdevicesinc/libiio/v0.25/COPYING.txt</licenseUrl>
+  <checksum>4cb028ed36fddc111f8d1735c5100136</checksum>
+</instructions>

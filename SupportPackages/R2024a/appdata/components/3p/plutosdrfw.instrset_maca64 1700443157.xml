@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<componentData>
+  <component>
+    <componentBaseName>3p/plutosdrfw.instrset</componentBaseName>
+    <componentFileName>3p/plutosdrfw.instrset_maca64_1700443157.zip</componentFileName>
+    <componentName>3p/plutosdrfw.instrset_maca64</componentName>
+    <componentVersion>1700443157</componentVersion>
+    <contentType>maca64</contentType>
+    <demo>0</demo>
+    <doc>0</doc>
+    <doc_build>0</doc_build>
+    <doc_search>0</doc_search>
+    <gpu>0</gpu>
+    <instrDisplayName>PlutoSDR Firmware</instrDisplayName>
+    <instrLicenseUrl>https://github.com/analogdevicesinc/plutosdr-fw/blob/master/LICENSE.md</instrLicenseUrl>
+    <instrset>1</instrset>
+    <locale/>
+    <locationId>1</locationId>
+    <numFiles>1</numFiles>
+    <platformList>
+      <platform>maca64</platform>
+    </platformList>
+    <releaseFamily>R2024a</releaseFamily>
+    <size>747</size>
+    <type/>
+    <uncompressedBytes>1161</uncompressedBytes>
+  </component>
+</componentData>
