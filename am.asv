@@ -1,0 +1,84 @@
+% Simulation of Amplitude Modulation (AM)
+% Mobile & Space Comm Lab Simulation #1
+
+% Simulation Parameters
+fc = 2.5e3;       % Carrier frequency (2.5 kHz)
+m_index = 0.875;  % Modulation index
+t0 = 0.025;       % Time parameter
+
+% Time vector
+t = 0:1e-5:0.1;   % Time vector with fine resolution
+
+% Message signal definition
+m = zeros(size(t));
+m(t >= 0 & t < t0/4) = 2;
+m(t >= t0/4 & t < 3*t0/4) = -1;
+
+% Carrier signal
+carrier = sin(2*pi*fc*t);
+
+% Amplitude Modulated Signal
+am_signal = (1 + m_index * m) .* carrier;
+
+% Envelope Detection
+envelope = abs(hilbert(am_signal));
+
+% Signal Power Calculation
+signal_power = mean(am_signal.^2);
+
+% Noise Power Levels
+noise_power_1 = signal_power / 10;   % 1/10 of signal power
+noise_power_2 = signal_power / 50;   % 1/50 of signal power
+
+% Adding Additive White Gaussian Noise (AWGN)
+noise_1 = sqrt(noise_power_1) * randn(size(t));
+noise_2 = sqrt(noise_power_2) * randn(size(t));
+
+am_signal_noisy_1 = am_signal + noise_1;
+am_signal_noisy_2 = am_signal + noise_2;
+
+% Envelope Detection for Noisy Signals
+envelope_noisy_1 = abs(hilbert(am_signal_noisy_1));
+envelope_noisy_2 = abs(hilbert(am_signal_noisy_2));
+
+% ============================
+% Plotting Results for Assignment
+% ============================
+
+figure('Position', [100, 100, 800, 800]);
+
+% 1. Original Message Signal
+subplot(4, 1, 1);
+plot(t, m, 'LineWidth', 1.5);
+title('Original Message Signal');
+xlabel('Time (s)');
+ylabel('Amplitude');
+grid on;
+
+% 2. Amplitude Modulated Signal
+subplot(4, 1, 2);
+plot(t, am_signal, 'LineWidth', 1.5);
+title('Amplitude Modulated Signal');
+xlabel('Time (s)');
+ylabel('Amplitude');
+grid on;
+
+% 3. Envelope of AM Signal
+subplot(4, 1, 3);
+plot(t, envelope, 'LineWidth', 1.5, 'r'); hold on;
+title('Envelope of AM Signal');
+xlabel('Time (s)');
+ylabel('Amplitude');
+legend('Envelope');
+grid on;
+
+% 4. Envelope Detection with Noise
+subplot(4, 1, 4);
+plot(t, envelope_noisy_1, 'LineWidth', 1.5, 'b'); hold on;
+plot(t, envelope_noisy_2, 'LineWidth', 1.5, 'g');
+title('Envelope of Noisy AM Signals');
+xlabel('Time (s)');
+ylabel('Amplitude');
+legend('Envelope (Noise 1/10)', 'Envelope (Noise 1/50)');
+grid on;
+
