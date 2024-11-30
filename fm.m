@@ -1,108 +1,79 @@
-% Frequency Modulation (FM) Simulation
 % Parameters
-fc = 2.5e3;     % Carrier frequency (2.5 kHz)
-kf = 50;        % Frequency deviation constant
+fc = 2.5e3;     % Carrier frequency (Hz)
+kf = 100;       % Increased frequency deviation constant
 t0 = 0.025;     % Time parameter
-bw = 120;       % Bandwidth of message signal main lobe (120 Hz)
+dt = 1e-5;      % Time step
+t = 0:dt:0.1;   % Time vector
+fs = 1/dt;      % Sampling frequency
 
-% Time vector
-dt = 1e-5;
-t = 0:dt:0.1;   % Time vector with fine resolution
-
-% Message signal definition
+% Message signal
 m = zeros(size(t));
 m(t >= 0 & t < t0/4) = 2;
 m(t >= t0/4 & t < 3*t0/4) = -1;
 
-% Carrier signal
-carrier_freq = fc;
+% Frequency deviation
+freqdev = kf * max(abs(m)); % Deviation proportional to max message amplitude
 
-% Frequency Modulated Signal
-phase_integral = 2*pi*carrier_freq*t + 2*pi*kf*cumsum(m)*dt;
-fm_signal = cos(phase_integral);
+% FM Modulation
+fm_signal = fmmod(m, fc, fs, freqdev);
 
-% Calculate Signal Power
+% Add AWGN (noise)
 signal_power = mean(fm_signal.^2);
+noise_power1 = signal_power / 10;   % Noise power level 1
+noise_power2 = signal_power / 50;  % Noise power level 2
+noisy_fm_signal = fm_signal + sqrt(noise_power1) * randn(size(fm_signal)) + ...
+                               sqrt(noise_power2) * randn(size(fm_signal));
 
-% Generate AWGN with two different noise power levels
-noise_power1 = signal_power / 10;   % 1/10 of signal power
-noise_power2 = signal_power / 50;   % 1/50 of signal power
+% FM Demodulation
+bandpass_fm_signal = bandpass(noisy_fm_signal, [fc-500, fc+500], fs);
+demod_signal = fmdemod(bandpass_fm_signal, fc, fs, freqdev);
 
-% Create noisy FM signals
-noise1 = sqrt(noise_power1) * randn(size(fm_signal));
-noise2 = sqrt(noise_power2) * randn(size(fm_signal));
 
-noisy_fm_signal1 = fm_signal + noise1;
-noisy_fm_signal2 = fm_signal + noise2;
+% Improved Low-pass filtering
+filtered_demod_signal = lowpass(demod_signal, 100, fs); % Lower cutoff frequency
 
-% Demodulation Function
-function demod_signal = fm_demodulate(signal, fc, kf, dt)
-    phase_derivative = diff(unwrap(angle(hilbert(signal))))/dt;
-    demod_signal = (phase_derivative - 2*pi*fc) / (2*pi*kf);
-end
+% Normalize the demodulated signal
+filtered_demod_signal = filtered_demod_signal / max(abs(filtered_demod_signal)) * max(abs(m));
 
-% Demodulate signals
-demod_signal = fm_demodulate(fm_signal, fc, kf, dt);
+% ===========================
+% Visualization for FM Modulation and Demodulation
+% ===========================
 
-% Spectrum Analysis
-N = length(t);
-message_freq = linspace(0, 1/dt, N);
-message_spectrum = abs(fft(m)/N);
-message_spectrum = message_spectrum(1:N/2);
-message_freq = message_freq(1:N/2);
-
-modulated_spectrum = abs(fft(fm_signal)/N);
-modulated_spectrum = modulated_spectrum(1:N/2);
-modulated_freq = linspace(0, 1/dt, N/2);
-
-% =========================
-% Plotting for Assignments
-% =========================
-
-% 1. Plot the Frequency Modulated Signal
+% Time-Domain FM Signal Plot
 figure('Position', [100, 100, 800, 600]);
 
-% Original Message Signal
-subplot(3, 1, 1);
-plot(t, m, 'LineWidth', 1.5);
-title('Original Message Signal');
-xlabel('Time (s)');
-ylabel('Amplitude');
-grid on;
-
 % Frequency Modulated Signal
-subplot(3, 1, 2);
-plot(t, fm_signal, 'LineWidth', 1.5);
-title('Frequency Modulated Signal');
+subplot(3, 1, 1);
+plot(t, fm_signal, 'b', 'LineWidth', 1.5);
+title('Frequency Modulated Signal (FM)');
 xlabel('Time (s)');
 ylabel('Amplitude');
 grid on;
 
-% Demodulated Signal vs Original Signal
+% Frequency-Domain Spectrum of Message and FM Signals
+message_spectrum = abs(fft(m) / length(m));
+message_freq = linspace(0, fs/2, length(m)/2);
+
+modulated_spectrum = abs(fft(fm_signal) / length(fm_signal));
+modulated_freq = linspace(0, fs/2, length(fm_signal)/2);
+
+subplot(3, 1, 2);
+plot(message_freq, message_spectrum(1:end/2), 'r', 'LineWidth', 1.5); hold on;
+plot(modulated_freq, modulated_spectrum(1:end/2), 'b', 'LineWidth', 1.5);
+title('Spectra of Message and Modulated Signals');
+xlim([0 5e3]); % 0 ~ 5 kHz로 주파수 축 제한
+xlabel('Frequency (Hz)');
+ylabel('Magnitude');
+legend('Message Signal Spectrum', 'FM Signal Spectrum');
+grid on;
+
+% Time-Domain Comparison: Demodulated vs Original Message Signal
 subplot(3, 1, 3);
-plot(t(1:length(demod_signal)), demod_signal, 'r', 'LineWidth', 1.5); hold on;
-plot(t, m, 'b--', 'LineWidth', 1.5); % Overlay original message signal for comparison
+plot(t, filtered_demod_signal, 'r', 'LineWidth', 1.5); hold on;
+plot(t, m, 'b--', 'LineWidth', 1.5);
 title('Demodulated Signal vs Original Message Signal');
 xlabel('Time (s)');
 ylabel('Amplitude');
 legend('Demodulated Signal', 'Original Message Signal');
 grid on;
 
-% 2. Plot the Spectra of the Message and the Modulated Signals
-figure('Position', [100, 100, 800, 600]);
-
-% Message Signal Spectrum
-subplot(2, 1, 1);
-plot(message_freq, message_spectrum, 'LineWidth', 1.5);
-title('Message Signal Spectrum');
-xlabel('Frequency (Hz)');
-ylabel('Magnitude');
-grid on;
-
-% Modulated Signal Spectrum
-subplot(2, 1, 2);
-plot(modulated_freq, modulated_spectrum, 'LineWidth', 1.5);
-title('Modulated Signal Spectrum');
-xlabel('Frequency (Hz)');
-ylabel('Magnitude');
-grid on;
