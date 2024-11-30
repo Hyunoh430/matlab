@@ -51,17 +51,16 @@ ylabel('Amplitude');
 grid on;
 
 % Frequency-Domain Spectrum of Message and FM Signals
-message_spectrum = abs(fft(m) / length(m));
-message_freq = linspace(0, fs/2, length(m)/2);
+message_spectrum_full = fftshift(abs(fft(m) / length(m)));
+modulated_spectrum_full = fftshift(abs(fft(fm_signal) / length(fm_signal)));
 
-modulated_spectrum = abs(fft(fm_signal) / length(fm_signal));
-modulated_freq = linspace(0, fs/2, length(fm_signal)/2);
+% Frequency axis for full spectrum (-fs/2 to fs/2)
+full_freq_axis = linspace(-fs/2, fs/2, length(m));
 
 subplot(3, 1, 2);
-plot(message_freq, message_spectrum(1:end/2), 'r', 'LineWidth', 1.5); hold on;
-plot(modulated_freq, modulated_spectrum(1:end/2), 'b', 'LineWidth', 1.5);
-title('Spectra of Message and Modulated Signals');
-xlim([0 5e3]); % 0 ~ 5 kHz로 주파수 축 제한
+plot(full_freq_axis, message_spectrum_full, 'r', 'LineWidth', 1.5); hold on;
+plot(full_freq_axis, modulated_spectrum_full, 'b', 'LineWidth', 1.5);
+title('Spectra of Message and Modulated Signals (Full Frequency Range)');
 xlabel('Frequency (Hz)');
 ylabel('Magnitude');
 legend('Message Signal Spectrum', 'FM Signal Spectrum');
