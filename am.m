@@ -1,5 +1,4 @@
 % Simulation of Amplitude Modulation (AM)
-% Mobile & Space Comm Lab Simulation #1
 
 % Simulation Parameters
 fc = 2.5e3;       % Carrier frequency (2.5 kHz)
@@ -64,7 +63,7 @@ grid on;
 % 3. Envelope of Noisy AM Signal
 subplot(3, 1, 3);
 plot(t, envelope_noisy, 'r', 'LineWidth', 1.5); hold on;
-plot(t, envelope, 'b--', 'LineWidth', 1.5); % Overlay original envelope for comparison
+plot(t, envelope, 'b--', 'LineWidth', 1.5); 
 title('Envelope of AM Signal with Combined Noise');
 xlabel('Time (s)');
 ylabel('Amplitude');
