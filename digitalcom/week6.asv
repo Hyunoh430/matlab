@@ -62,11 +62,6 @@ f_s = 10^6;
 BPSK = randi([0,1],1,1000);
 BPSK = BPSK * 2 - 1;
 BPSK = upsample(BPSK, 10);
-RC_conv = conv(BPSK, RC_2, 'same');
-RCC_conv = conv(BPSK, RRC_2, 'same');
 
-figure;
-plot(BPSK(1:100)); hold on;
-plot(RC_conv(1:100)); hold on;
-plot(RCC_conv(1:100)); hold on;
+plot(BPSK);
 
