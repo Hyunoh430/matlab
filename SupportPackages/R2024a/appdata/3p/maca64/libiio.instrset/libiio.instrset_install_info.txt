@@ -1,1 +1,0 @@
-installLocation = /Users/hyunoh/Documents/MATLAB/SupportPackages/R2024a/3P.instrset/libiio.instrset
